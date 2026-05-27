@@ -17,3 +17,5 @@ dist/
 *.db
 *.sqlite
 .vscode/
+
+class_diagram.md

@@ -78,7 +78,29 @@ Saat pertama kali dijalankan, aplikasi akan mendeteksi bahwa vault belum di-setu
 
 ---
 
-## Struktur Folder
+## Standalone Release (Tanpa MySQL / Java)
+
+Tidak ingin repot install MySQL, Java, atau Maven? Gunakan **Lokki_app** — SQLite + Java runtime sudah dibundle. Cukup download, extract, dan jalankan.
+
+### Perbedaan dengan versi utama
+
+| Aspek | Versi Utama | Standalone (Lokki_app) |
+|-------|-------------|------------------------|
+| Database | MySQL 8.x | SQLite (file `lokki.db`) |
+| Runtime | Perlu Java 17+ | Sudah termasuk Java runtime |
+| Build | Perlu Maven | Langsung pakai `.exe` / `.bat` |
+| File DB | Di MySQL server | `lokki.db` di folder aplikasi |
+
+### Cara pakai
+
+1. Download `Lokki_app.zip` dari [halaman Releases](https://github.com/indraprhmbd/Lokki/releases/tag/v1.0.0)
+2. Extract ke folder mana saja
+3. Jalankan `Lokki_app.exe` (atau `Lokki_app.bat` jika SmartScreen muncul)
+4. Database `lokki.db` dibuat otomatis saat setup pertama
+
+Kedua versi menggunakan format enkripsi dan skema vault yang identik. Data dapat dipindahkan antar versi dengan migrasi manual tabel `master_config` dan `credentials`.
+
+---
 
 ```
 lokki/

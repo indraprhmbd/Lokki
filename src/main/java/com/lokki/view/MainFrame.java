@@ -3,15 +3,17 @@ package com.lokki.view;
 import com.lokki.model.Category;
 import com.lokki.model.Credential;
 import com.lokki.util.AppIcon;
+import com.lokki.view.component.AutoLockManager;
 import com.lokki.view.component.ClipboardTimer;
 import com.lokki.view.component.CredentialTableModel;
+import com.lokki.view.component.MainMenuBar;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -20,18 +22,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -43,11 +41,9 @@ public class MainFrame extends JFrame {
     private JLabel statusLabel;
     private JLabel clipboardLabel;
     private JLabel autoLockLabel;
-
     private ClipboardTimer clipboardTimer;
-    private Timer autoLockTimer;
-    private static final int AUTO_LOCK_DELAY_MS = 5 * 60 * 1000;
-    private int autoLockCountdown;
+    private AutoLockManager autoLockManager;
+    private MainMenuBar menuBar;
 
     private MainFrameCallback callback;
     private List<Credential> currentCredentials;
@@ -60,6 +56,7 @@ public class MainFrame extends JFrame {
         void onCopyPassword(Credential credential);
         void onSearch(String searchTerm);
         void onCategoryFilter(int categoryId);
+        void onShowPasswordGenerator();
         void onLock();
         void onExit();
         void onRefresh();
@@ -72,19 +69,31 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         initComponents();
-        initAutoLock();
         initClipboardTimer();
     }
 
     public void setCallback(MainFrameCallback callback) {
         this.callback = callback;
+        if (menuBar != null) {
+            menuBar.setCallback(callback);
+        }
     }
 
-    private void initComponents() {
-        setJMenuBar(createMenuBar());
+    public void initComponents() {
+        menuBar = new MainMenuBar();
+        setJMenuBar(menuBar);
+
+        add(createStatusBar(), BorderLayout.SOUTH);
+
+        autoLockManager = new AutoLockManager(autoLockLabel, new Runnable() {
+            @Override
+            public void run() {
+                if (callback != null) callback.onLock();
+            }
+        });
+
         add(createToolBar(), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
-        add(createStatusBar(), BorderLayout.SOUTH);
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -94,86 +103,6 @@ public class MainFrame extends JFrame {
                 }
             }
         });
-    }
-
-    private JMenuBar createMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-
-        JMenuItem lockItem = new JMenuItem("Lock Vault", KeyEvent.VK_L);
-        lockItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
-        lockItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (callback != null) callback.onLock();
-            }
-        });
-        fileMenu.add(lockItem);
-
-        fileMenu.addSeparator();
-
-        JMenuItem exitItem = new JMenuItem("Exit", KeyEvent.VK_X);
-        exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
-        exitItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (callback != null) callback.onExit();
-            }
-        });
-        fileMenu.add(exitItem);
-
-        menuBar.add(fileMenu);
-
-        JMenu editMenu = new JMenu("Edit");
-        editMenu.setMnemonic(KeyEvent.VK_E);
-
-        JMenuItem addItem = new JMenuItem("Add Credential", KeyEvent.VK_A);
-        addItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        addItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (callback != null) callback.onAddCredential();
-            }
-        });
-        editMenu.add(addItem);
-
-        menuBar.add(editMenu);
-
-        JMenu toolsMenu = new JMenu("Tools");
-        toolsMenu.setMnemonic(KeyEvent.VK_T);
-
-        JMenuItem passwordGenItem = new JMenuItem("Password Generator", KeyEvent.VK_G);
-        passwordGenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ActionEvent.CTRL_MASK));
-        passwordGenItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                PasswordGeneratorDialog dialog = new PasswordGeneratorDialog(MainFrame.this);
-                dialog.setVisible(true);
-            }
-        });
-        toolsMenu.add(passwordGenItem);
-
-        menuBar.add(toolsMenu);
-
-        JMenu helpMenu = new JMenu("Help");
-        helpMenu.setMnemonic(KeyEvent.VK_H);
-
-        JMenuItem aboutItem = new JMenuItem("About Lokki");
-        aboutItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(MainFrame.this,
-                        "Lokki - Local Password Manager\nVersion 1.0.0\n\nAll data stays on your machine.\nNo network calls are made.",
-                        "About Lokki", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        helpMenu.add(aboutItem);
-
-        menuBar.add(helpMenu);
-
-        return menuBar;
     }
 
     private JToolBar createToolBar() {
@@ -220,7 +149,7 @@ public class MainFrame extends JFrame {
             }
         });
 
-        resetAutoLockTimer();
+        autoLockManager.reset();
         return toolbar;
     }
 
@@ -233,7 +162,7 @@ public class MainFrame extends JFrame {
                 callback.onSearch(term);
             }
         }
-        resetAutoLockTimer();
+        autoLockManager.reset();
     }
 
     private JPanel createMainPanel() {
@@ -256,7 +185,7 @@ public class MainFrame extends JFrame {
                         callback.onEditCredential(tableModel.getCredentialAt(modelRow));
                     }
                 }
-                resetAutoLockTimer();
+                autoLockManager.reset();
             }
         });
 
@@ -270,7 +199,7 @@ public class MainFrame extends JFrame {
                     int modelRow = credentialTable.convertRowIndexToModel(row);
                     callback.onCopyUsername(tableModel.getCredentialAt(modelRow));
                 }
-                resetAutoLockTimer();
+                autoLockManager.reset();
             }
         });
         contextMenu.add(copyUserItem);
@@ -284,7 +213,7 @@ public class MainFrame extends JFrame {
                     int modelRow = credentialTable.convertRowIndexToModel(row);
                     callback.onCopyPassword(tableModel.getCredentialAt(modelRow));
                 }
-                resetAutoLockTimer();
+                autoLockManager.reset();
             }
         });
         contextMenu.add(copyPassItem);
@@ -300,7 +229,7 @@ public class MainFrame extends JFrame {
                     int modelRow = credentialTable.convertRowIndexToModel(row);
                     callback.onEditCredential(tableModel.getCredentialAt(modelRow));
                 }
-                resetAutoLockTimer();
+                autoLockManager.reset();
             }
         });
         contextMenu.add(editItem);
@@ -314,7 +243,7 @@ public class MainFrame extends JFrame {
                     int modelRow = credentialTable.convertRowIndexToModel(row);
                     callback.onDeleteCredential(tableModel.getCredentialAt(modelRow));
                 }
-                resetAutoLockTimer();
+                autoLockManager.reset();
             }
         });
         contextMenu.add(deleteItem);
@@ -340,46 +269,6 @@ public class MainFrame extends JFrame {
         statusBar.add(autoLockLabel);
 
         return statusBar;
-    }
-
-    private void initAutoLock() {
-        int resetIntervalMs = 5000;
-        autoLockTimer = new Timer(resetIntervalMs, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                autoLockCountdown -= 5;
-                if (autoLockCountdown <= 0) {
-                    autoLockTimer.stop();
-                    autoLockLabel.setText(" ");
-                    if (callback != null) {
-                        callback.onLock();
-                    }
-                } else {
-                    int minutes = autoLockCountdown / 60;
-                    int seconds = autoLockCountdown % 60;
-                    autoLockLabel.setText(String.format("Auto-lock in %d:%02d", minutes, seconds));
-                }
-            }
-        });
-
-        Toolkit.getDefaultToolkit().addAWTEventListener(new java.awt.event.AWTEventListener() {
-            @Override
-            public void eventDispatched(java.awt.AWTEvent event) {
-                if (event.getSource() instanceof javax.swing.JComponent) {
-                    resetAutoLockTimer();
-                }
-            }
-        }, java.awt.AWTEvent.MOUSE_EVENT_MASK | java.awt.AWTEvent.KEY_EVENT_MASK | java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK);
-
-        resetAutoLockTimer();
-    }
-
-    public void resetAutoLockTimer() {
-        autoLockCountdown = AUTO_LOCK_DELAY_MS / 1000;
-        if (autoLockTimer != null) {
-            autoLockTimer.stop();
-            autoLockTimer.start();
-        }
     }
 
     private void initClipboardTimer() {
@@ -411,7 +300,7 @@ public class MainFrame extends JFrame {
         this.currentCredentials = credentials;
         tableModel.setCredentials(credentials);
         statusLabel.setText("Vault unlocked - " + credentials.size() + " credential(s)");
-        resetAutoLockTimer();
+        autoLockManager.reset();
     }
 
     public void setCategories(List<Category> categories) {
@@ -424,7 +313,7 @@ public class MainFrame extends JFrame {
 
     public void startClipboardCountdown() {
         clipboardTimer.start();
-        resetAutoLockTimer();
+        autoLockManager.reset();
     }
 
     public void copyToClipboard(String text) {

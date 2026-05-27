@@ -51,7 +51,7 @@ public class CredentialTableModel extends AbstractTableModel {
             case 0: return credential.getSiteName();
             case 1: return credential.getUsername();
             case 2: return "********";
-            case 3: return credential.getCategoryId();
+            case 3: return credential.getCategoryName();
             case 4: return credential.getUpdatedAt() != null ? credential.getUpdatedAt() : credential.getCreatedAt();
             default: return null;
         }

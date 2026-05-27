@@ -30,20 +30,4 @@ public class CategoryDAO {
         return categories;
     }
 
-    /**
-     * Returns the category name for a given id.
-     */
-    public String getNameById(int id) throws SQLException {
-        String sql = "SELECT name FROM categories WHERE id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("name");
-                }
-            }
-        }
-        return "General";
-    }
 }

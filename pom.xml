@@ -38,7 +38,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.lokki.view.LoginFrame</mainClass>
+                    <mainClass>com.lokki.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>

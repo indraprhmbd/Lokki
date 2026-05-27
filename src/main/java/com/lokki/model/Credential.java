@@ -8,6 +8,7 @@ public class Credential {
     private String username;
     private String encryptedPassword;
     private int categoryId;
+    private String categoryName;
     private String notes;
     private String createdAt;
     private String updatedAt;
@@ -69,6 +70,14 @@ public class Credential {
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getNotes() {

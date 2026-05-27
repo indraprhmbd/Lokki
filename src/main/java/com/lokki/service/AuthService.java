@@ -82,6 +82,7 @@ public class AuthService {
      * verifying the password hash, and decrypting the vault key.
      */
     public byte[] login(char[] masterPassword) {
+        byte[] masterDerivedKey = null;
         try {
             MasterConfig config = masterConfigDAO.get();
             if (config == null) {
@@ -89,25 +90,25 @@ public class AuthService {
             }
 
             byte[] saltMaster = Base64.getDecoder().decode(config.getSaltMaster());
-            byte[] masterDerivedKey = KeyDerivationService.deriveKey(masterPassword, saltMaster);
+            masterDerivedKey = KeyDerivationService.deriveKey(masterPassword, saltMaster);
 
             String expectedHash = KeyDerivationService.hashPassword(masterPassword, saltMaster);
             if (!expectedHash.equals(config.getPasswordHash())) {
-                SecureMemoryUtil.clearByteArray(masterDerivedKey);
-                SecureMemoryUtil.clearCharArray(masterPassword);
                 throw new RuntimeException("Invalid master password");
             }
 
             String decryptedVaultKeyBase64 = EncryptionService.decryptWithAES(masterDerivedKey, config.getEncryptedVaultKeyByMaster());
             byte[] vaultKey = Base64.getDecoder().decode(decryptedVaultKeyBase64);
 
-            SecureMemoryUtil.clearByteArray(masterDerivedKey);
-            SecureMemoryUtil.clearCharArray(masterPassword);
             this.activeVaultKey = vaultKey;
             return vaultKey;
         } catch (Exception e) {
-            SecureMemoryUtil.clearCharArray(masterPassword);
             throw new RuntimeException("Login failed", e);
+        } finally {
+            if (masterDerivedKey != null) {
+                SecureMemoryUtil.clearByteArray(masterDerivedKey);
+            }
+            SecureMemoryUtil.clearCharArray(masterPassword);
         }
     }
 

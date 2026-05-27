@@ -1,7 +1,5 @@
 package com.lokki.view;
 
-import com.lokki.service.PasswordGeneratorService;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -11,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -20,6 +17,16 @@ import java.awt.Insets;
 
 public class PasswordGeneratorDialog extends JDialog {
 
+    public interface Generator {
+        String generate(int length, boolean includeUppercase, boolean includeLowercase,
+                        boolean includeDigits, boolean includeSymbols);
+    }
+
+    public interface PasswordSelectionCallback {
+        void onPasswordSelected(String password);
+    }
+
+    private final Generator generator;
     private JSpinner lengthSpinner;
     private JCheckBox uppercaseCheckbox;
     private JCheckBox lowercaseCheckbox;
@@ -30,12 +37,9 @@ public class PasswordGeneratorDialog extends JDialog {
     private String selectedPassword;
     private PasswordSelectionCallback callback;
 
-    public interface PasswordSelectionCallback {
-        void onPasswordSelected(String password);
-    }
-
-    public PasswordGeneratorDialog(JFrame parent) {
+    public PasswordGeneratorDialog(JFrame parent, Generator generator) {
         super(parent, "Password Generator", true);
+        this.generator = generator;
         initComponents();
         pack();
         setLocationRelativeTo(parent);
@@ -147,7 +151,7 @@ public class PasswordGeneratorDialog extends JDialog {
             return;
         }
 
-        selectedPassword = PasswordGeneratorService.generate(length, useUpper, useLower, useDigits, useSymbols);
+        selectedPassword = generator.generate(length, useUpper, useLower, useDigits, useSymbols);
         previewField.setText(selectedPassword);
         useButton.setEnabled(true);
     }

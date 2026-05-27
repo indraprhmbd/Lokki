@@ -1,7 +1,5 @@
 package com.lokki.view;
 
-import com.lokki.controller.AuthController;
-import com.lokki.controller.VaultController;
 import com.lokki.util.AppIcon;
 
 import javax.swing.JButton;
@@ -9,8 +7,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -164,61 +160,5 @@ public class LoginFrame extends JFrame {
         attemptsLabel.setText(" ");
         statusLabel.setText(" ");
         passwordField.setText("");
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-                } catch (Exception e) {
-                    // fall back to default look and feel
-                }
-
-                java.awt.Font brandFont = new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 13);
-                java.awt.Font brandFontBold = new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 13);
-                UIManager.put("defaultFont", brandFont);
-                UIManager.put("Button.font", brandFontBold);
-                UIManager.put("Label.font", brandFont);
-                UIManager.put("TextField.font", brandFont);
-                UIManager.put("PasswordField.font", brandFont);
-                UIManager.put("TextArea.font", brandFont);
-                UIManager.put("CheckBox.font", brandFont);
-                UIManager.put("ComboBox.font", brandFont);
-                UIManager.put("Table.font", brandFont);
-                UIManager.put("TableHeader.font", brandFontBold);
-                UIManager.put("MenuBar.font", brandFont);
-                UIManager.put("Menu.font", brandFont);
-                UIManager.put("MenuItem.font", brandFont);
-                UIManager.put("ToolBar.font", brandFont);
-                UIManager.put("TitledBorder.font", brandFontBold);
-                UIManager.put("ProgressBar.font", brandFont);
-
-                AuthController authController = new AuthController();
-                authController.setCallback(new AuthController.AuthCallback() {
-                    @Override
-                    public void onAuthenticated(byte[] vaultKey) {
-                        VaultController vaultController = new VaultController(vaultKey);
-                        vaultController.setAuthController(authController);
-                        vaultController.openMainFrame();
-                    }
-
-                    @Override
-                    public void onSessionCleared() {
-                        authController.setParentFrame(null);
-                        authController.startAuthFlow();
-                    }
-                });
-                authController.startAuthFlow();
-
-                Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        authController.clearSession();
-                    }
-                }));
-            }
-        });
     }
 }

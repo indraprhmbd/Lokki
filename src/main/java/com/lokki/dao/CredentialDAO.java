@@ -16,7 +16,8 @@ public class CredentialDAO {
      */
     public List<Credential> findAll() throws SQLException {
         List<Credential> credentials = new ArrayList<>();
-        String sql = "SELECT * FROM credentials ORDER BY site_name";
+        String sql = "SELECT c.*, cat.name AS category_name FROM credentials c "
+                + "LEFT JOIN categories cat ON c.category_id = cat.id ORDER BY c.site_name";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -32,7 +33,8 @@ public class CredentialDAO {
      */
     public List<Credential> findByCategory(int categoryId) throws SQLException {
         List<Credential> credentials = new ArrayList<>();
-        String sql = "SELECT * FROM credentials WHERE category_id = ? ORDER BY site_name";
+        String sql = "SELECT c.*, cat.name AS category_name FROM credentials c "
+                + "LEFT JOIN categories cat ON c.category_id = cat.id WHERE c.category_id = ? ORDER BY c.site_name";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, categoryId);
@@ -50,7 +52,8 @@ public class CredentialDAO {
      */
     public List<Credential> search(String searchTerm) throws SQLException {
         List<Credential> credentials = new ArrayList<>();
-        String sql = "SELECT * FROM credentials WHERE site_name LIKE ? ORDER BY site_name";
+        String sql = "SELECT c.*, cat.name AS category_name FROM credentials c "
+                + "LEFT JOIN categories cat ON c.category_id = cat.id WHERE c.site_name LIKE ? ORDER BY c.site_name";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, "%" + searchTerm + "%");
@@ -125,6 +128,7 @@ public class CredentialDAO {
         credential.setUsername(rs.getString("username"));
         credential.setEncryptedPassword(rs.getString("encrypted_password"));
         credential.setCategoryId(rs.getInt("category_id"));
+        credential.setCategoryName(rs.getString("category_name"));
         credential.setNotes(rs.getString("notes"));
         credential.setCreatedAt(rs.getString("created_at"));
         credential.setUpdatedAt(rs.getString("updated_at"));

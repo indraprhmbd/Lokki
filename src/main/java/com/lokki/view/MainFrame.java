@@ -332,4 +332,9 @@ public class MainFrame extends JFrame {
                 "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         return result == JOptionPane.YES_OPTION;
     }
+
+    public void cleanup() {
+        autoLockManager.stop();
+        clipboardTimer.stop();
+    }
 }

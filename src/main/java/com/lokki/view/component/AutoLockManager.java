@@ -15,6 +15,7 @@ public class AutoLockManager {
     private final Timer timer;
     private final JLabel statusLabel;
     private final Runnable onLock;
+    private final java.awt.event.AWTEventListener awtEventListener;
     private int countdownSeconds;
 
     public AutoLockManager(JLabel statusLabel, Runnable onLock) {
@@ -40,16 +41,23 @@ public class AutoLockManager {
             }
         });
 
-        Toolkit.getDefaultToolkit().addAWTEventListener(new java.awt.event.AWTEventListener() {
+        this.awtEventListener = new java.awt.event.AWTEventListener() {
             @Override
             public void eventDispatched(java.awt.AWTEvent event) {
                 if (event.getSource() instanceof javax.swing.JComponent) {
                     reset();
                 }
             }
-        }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+        };
+        Toolkit.getDefaultToolkit().addAWTEventListener(awtEventListener,
+                AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
 
         reset();
+    }
+
+    public void stop() {
+        timer.stop();
+        Toolkit.getDefaultToolkit().removeAWTEventListener(awtEventListener);
     }
 
     public void reset() {

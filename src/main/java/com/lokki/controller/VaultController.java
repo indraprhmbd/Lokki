@@ -99,6 +99,7 @@ public class VaultController {
 
             @Override
             public void onLock() {
+                mainFrame.cleanup();
                 mainFrame.dispose();
                 if (authController != null) {
                     authController.clearSession();
@@ -113,11 +114,15 @@ public class VaultController {
 
             @Override
             public void onExit() {
-                if (authController != null) {
-                    authController.clearSession();
+                try {
+                    if (authController != null) {
+                        authController.clearSession();
+                    }
+                } finally {
+                    mainFrame.cleanup();
+                    mainFrame.dispose();
+                    System.exit(0);
                 }
-                mainFrame.dispose();
-                System.exit(0);
             }
 
             @Override

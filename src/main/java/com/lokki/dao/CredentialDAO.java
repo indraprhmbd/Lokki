@@ -67,6 +67,24 @@ public class CredentialDAO {
     }
 
     /**
+     * Returns a credential by its id, or null if not found.
+     */
+    public Credential findById(int id) throws SQLException {
+        String sql = "SELECT c.*, cat.name AS category_name FROM credentials c "
+                + "LEFT JOIN categories cat ON c.category_id = cat.id WHERE c.id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+                return null;
+            }
+        }
+    }
+
+    /**
      * Inserts a new credential and sets its generated id.
      */
     public void insert(Credential credential) throws SQLException {

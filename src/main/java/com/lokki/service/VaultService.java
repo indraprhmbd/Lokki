@@ -77,6 +77,11 @@ public class VaultService {
             if (plaintextPassword != null && !plaintextPassword.isEmpty()) {
                 String encrypted = EncryptionService.encryptWithAES(vaultKey, plaintextPassword);
                 credential.setEncryptedPassword(encrypted);
+            } else {
+                Credential existing = credentialDAO.findById(credential.getId());
+                if (existing != null) {
+                    credential.setEncryptedPassword(existing.getEncryptedPassword());
+                }
             }
             credentialDAO.update(credential);
         } catch (SQLException e) {
@@ -111,8 +116,12 @@ public class VaultService {
      */
     private void decryptPasswords(byte[] vaultKey, List<Credential> credentials) {
         for (Credential credential : credentials) {
-            String decrypted = EncryptionService.decryptWithAES(vaultKey, credential.getEncryptedPassword());
-            credential.setEncryptedPassword(decrypted);
+            try {
+                String decrypted = EncryptionService.decryptWithAES(vaultKey, credential.getEncryptedPassword());
+                credential.setEncryptedPassword(decrypted);
+            } catch (Exception e) {
+                credential.setEncryptedPassword("[decryption error]");
+            }
         }
     }
 }

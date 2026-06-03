@@ -262,7 +262,7 @@ public class RecoveryFrame extends JFrame {
         menu.show(e.getComponent(), e.getX(), e.getY());
     }
 
-    private void clearAllFields() {
+    public void clearAllFields() {
         for (JTextField field : recoveryFields) {
             field.setText("");
         }

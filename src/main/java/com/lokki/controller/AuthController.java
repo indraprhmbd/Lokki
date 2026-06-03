@@ -117,6 +117,7 @@ public class AuthController {
                         callback.onAuthenticated(vaultKey);
                     }
                 } catch (Exception e) {
+                    recoveryFrame.clearAllFields();
                     JOptionPane.showMessageDialog(recoveryFrame,
                             "Recovery failed. Please check your recovery key.",
                             "Recovery Failed", JOptionPane.ERROR_MESSAGE);

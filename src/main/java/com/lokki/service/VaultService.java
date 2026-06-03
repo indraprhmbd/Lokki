@@ -79,9 +79,10 @@ public class VaultService {
                 credential.setEncryptedPassword(encrypted);
             } else {
                 Credential existing = credentialDAO.findById(credential.getId());
-                if (existing != null) {
-                    credential.setEncryptedPassword(existing.getEncryptedPassword());
+                if (existing == null) {
+                    throw new RuntimeException("Credential not found - it may have been deleted");
                 }
+                credential.setEncryptedPassword(existing.getEncryptedPassword());
             }
             credentialDAO.update(credential);
         } catch (SQLException e) {

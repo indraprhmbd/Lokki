@@ -1,4 +1,4 @@
-# Lokki — Belajar OOP dari Codebase
+# Lokki - Belajar OOP dari Codebase
 
 Dokumen ini memetakan konsep Pemrograman Berorientasi Objek (PBO) yang diajarkan di kelas ke dalam kode nyata pada proyek Lokki. Setiap konsep dilengkapi referensi file dan baris agar kamu bisa langsung membuka dan mempelajarinya.
 
@@ -10,8 +10,8 @@ Dokumen ini memetakan konsep Pemrograman Berorientasi Objek (PBO) yang diajarkan
 2. [Constructor](#2-constructor)
 3. [Encapsulation (Getter & Setter)](#3-encapsulation-getter--setter)
 4. [Inheritance (extends)](#4-inheritance-extends)
-5. [Polymorphism — Method Overriding](#5-polymorphism--method-overriding)
-6. [Polymorphism — Interface](#6-polymorphism--interface)
+5. [Polymorphism - Method Overriding](#5-polymorphism--method-overriding)
+6. [Polymorphism - Interface](#6-polymorphism--interface)
 7. [Abstract Class](#7-abstract-class)
 8. [Static vs Instance](#8-static-vs-instance)
 9. [`final` Keyword](#9-final-keyword)
@@ -62,7 +62,7 @@ Credential credential = new Credential("GitHub", "https://github.com",
 ```
 
 **Penjelasan:**
-- `Credential` adalah **class** — blueprint untuk data login
+- `Credential` adalah **class** - blueprint untuk data login
 - Saat dipanggil `new Credential()`, Java membuat **object** di heap memory
 - Satu class bisa membuat banyak object (misal 100 credential = 100 object Credential)
 
@@ -88,7 +88,7 @@ Credential credential = new Credential("GitHub", "https://github.com",
 // Constructor 1: tanpa parameter (default)
 public Credential() {}
 
-// Constructor 2: dengan parameter — inisialisasi langsung
+// Constructor 2: dengan parameter - inisialisasi langsung
 public Credential(String siteName, String siteUrl, String username,
                   String encryptedPassword, int categoryId, String notes) {
     this.siteName = siteName;
@@ -101,7 +101,7 @@ public Credential(String siteName, String siteUrl, String username,
 ```
 
 **Konsep penting:**
-- `this` merujuk ke object saat ini — membedakan field (`this.siteName`) dari parameter (`siteName`)
+- `this` merujuk ke object saat ini - membedakan field (`this.siteName`) dari parameter (`siteName`)
 - **Constructor overloading**: dua constructor dengan parameter berbeda
 - Jika tidak menulis constructor sama sekali, Java menyediakan **default constructor** (no-arg) secara implicit
 
@@ -143,7 +143,7 @@ private String siteName;
 Tidak bisa diakses langsung dari luar class:
 
 ```java
-// ❌ ERROR: field is private
+// ERROR: field is private
 credential.id = 5;
 credential.siteName = "GitHub";
 ```
@@ -151,16 +151,16 @@ credential.siteName = "GitHub";
 Harus melalui getter/setter publik:
 
 ```java
-// ✅ Benar
+// Benar
 credential.setId(5);
 credential.setSiteName("GitHub");
 String name = credential.getSiteName();
 ```
 
 **Mengapa enkapsulasi penting?**
-1. **Kontrol akses** — kita bisa validasi di setter (misal menolak `null`)
-2. **Read-only** — cukup buat getter saja tanpa setter
-3. **Internal representation hiding** — kita bisa mengubah implementasi internal tanpa mengubah kode pemanggil
+1. **Kontrol akses** - kita bisa validasi di setter (misal menolak `null`)
+2. **Read-only** - cukup buat getter saja tanpa setter
+3. **Internal representation hiding** - kita bisa mengubah implementasi internal tanpa mengubah kode pemanggil
 
 ---
 
@@ -231,7 +231,7 @@ JDialog
 
 ---
 
-## 5. Polymorphism — Method Overriding
+## 5. Polymorphism - Method Overriding
 
 **Materi:** Overriding adalah menulis ulang method dari superclass di subclass dengan implementasi yang berbeda. Ditandai dengan anotasi `@Override`.
 
@@ -278,9 +278,9 @@ protected void paintComponent(Graphics g) {
 
 ---
 
-## 6. Polymorphism — Interface
+## 6. Polymorphism - Interface
 
-**Materi:** Interface adalah kontrak yang mendefinisikan method apa saja yang harus dimiliki oleh class yang mengimplementasikannya. Interface memungkinkan **polymorphism** — object dari class berbeda bisa diperlakukan sama melalui interface yang sama.
+**Materi:** Interface adalah kontrak yang mendefinisikan method apa saja yang harus dimiliki oleh class yang mengimplementasikannya. Interface memungkinkan **polymorphism** - object dari class berbeda bisa diperlakukan sama melalui interface yang sama.
 
 ### Contoh 1: Interface `Generator` di `PasswordGeneratorDialog`
 
@@ -385,15 +385,15 @@ String encrypted = EncryptionService.encryptWithAES(vaultKey, "password123");
 String decrypted = EncryptionService.decryptWithAES(vaultKey, encrypted);
 ```
 
-### Contoh Instance — setiap object punya state sendiri
+### Contoh Instance - setiap object punya state sendiri
 
 ```java
 // File: src/main/java/com/lokki/controller/AuthController.java, baris 17-18
 private final AuthService authService;  // instance field
-private byte[] vaultKey;                // instance field — berbeda untuk setiap object
+private byte[] vaultKey;                // instance field - berbeda untuk setiap object
 
 // File: src/main/java/com/lokki/dao/DatabaseManager.java, baris 15
-private static Connection connection;   // static — satu koneksi untuk semua pemanggil
+private static Connection connection;   // static - satu koneksi untuk semua pemanggil
 ```
 
 ### Utility class dengan static methods:
@@ -408,7 +408,7 @@ private static Connection connection;   // static — satu koneksi untuk semua p
 | `RecoveryKeyFormatter` | `format`, `strip`, `getExpectedLength` |
 | `AppIcon` | `getIcon` |
 
-Semua class di atas punya **private constructor** — tidak bisa dibuat object-nya.
+Semua class di atas punya **private constructor** - tidak bisa dibuat object-nya.
 
 ---
 
@@ -421,7 +421,7 @@ Semua class di atas punya **private constructor** — tidak bisa dibuat object-n
 | Penggunaan | File | Baris | Arti |
 |-----------|------|-------|------|
 | `public final class EncryptionService` | `EncryptionService.java` | 9 | Class tidak bisa di-extends |
-| `private static final String ALGORITHM` | `EncryptionService.java` | 11 | Konstanta — tidak bisa diubah |
+| `private static final String ALGORITHM` | `EncryptionService.java` | 11 | Konstanta - tidak bisa diubah |
 | `private final AuthService authService` | `AuthController.java` | 17 | Field reference tidak bisa di-reassign |
 
 ---
@@ -498,7 +498,7 @@ public static String encryptWithAES(byte[] key, String plaintext) {
         return Base64.getEncoder().encodeToString(combined);
     } catch (Exception e) {
         throw new RuntimeException("Encryption failed", e);
-        //          ^^^ unchecked exception — tidak wajib di-declare di throws
+        //          ^^^ unchecked exception - tidak wajib di-declare di throws
     }
 }
 ```
@@ -527,7 +527,45 @@ try {
 }
 ```
 
-`finally` **selalu** dijalankan — baik ada exception maupun tidak. Cocok untuk cleanup (hapus key dari memory, tutup koneksi, dll).
+`finally` **selalu** dijalankan - baik ada exception maupun tidak. Cocok untuk cleanup (hapus key dari memory, tutup koneksi, dll).
+
+### Contoh 5: Try-Finally untuk jaminan System.exit
+
+```java
+// File: src/main/java/com/lokki/controller/VaultController.java, baris 116-126
+@Override
+public void onExit() {
+    try {
+        if (authController != null) {
+            authController.clearSession();
+        }
+    } finally {
+        mainFrame.cleanup();   // matikan timer + hapus event listener
+        mainFrame.dispose();
+        System.exit(0);        // tetap dijalankan meskipun clearSession() throw
+    }
+}
+```
+
+### Contoh 6: Per-item exception handling - satu credential corrupt tidak merusak yang lain
+
+```java
+// File: src/main/java/com/lokki/service/VaultService.java, baris 118-127
+private void decryptPasswords(byte[] vaultKey, List<Credential> credentials) {
+    for (Credential credential : credentials) {
+        try {
+            String decrypted = EncryptionService.decryptWithAES(
+                    vaultKey, credential.getEncryptedPassword());
+            credential.setEncryptedPassword(decrypted);
+        } catch (Exception e) {
+            credential.setEncryptedPassword("[decryption error]");
+            // teruskan ke credential berikutnya, jangan crash
+        }
+    }
+}
+```
+
+**Pola penting:** Exception di dalam loop ditangkap per-item, bukan per-list. Satu data corrupt tidak menghalangi data lain untuk ditampilkan.
 
 ---
 
@@ -565,7 +603,7 @@ public CredentialTableModel() {
 ```java
 // File: src/main/java/com/lokki/model/Credential.java
 private List<Credential> credentials;
-//       ^^^^^^^^^^^^^^^ generic — list hanya bisa berisi object Credential
+//       ^^^^^^^^^^^^^^^ generic - list hanya bisa berisi object Credential
 ```
 
 **Tanpa generic (sebelum Java 5):**
@@ -581,14 +619,14 @@ list.add(new Credential());  // tidak ada pemeriksaan tipe
 
 ```java
 List<Credential> list = new ArrayList<>();
-list.add(new Credential());  // ✅ hanya Credential
-list.add("string");           // ❌ compile error
+list.add(new Credential());  // Benar, hanya Credential
+list.add("string");           // Salah, compile error
 ```
 
 ### Generic di interface callback:
 
 ```java
-// Consumer<Integer> — generic interface dengan tipe Integer
+// Consumer<Integer> - generic interface dengan tipe Integer
 // File: ClipboardTimer.java
 private final Consumer<Integer> onTick;
 ```
@@ -615,16 +653,30 @@ this.timer = new Timer(TICK_INTERVAL_MS, new ActionListener() {
 ### Contoh 2: Implementasi `AWTEventListener` secara anonymous
 
 ```java
-// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 43-50
-Toolkit.getDefaultToolkit().addAWTEventListener(new java.awt.event.AWTEventListener() {
+// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 44-53
+this.awtEventListener = new java.awt.event.AWTEventListener() {
     @Override
-    public void eventDispatched(java.awt.AWTEvent event) {
+    public void eventDispatched(java.awt.event.AWTEvent event) {
         if (event.getSource() instanceof javax.swing.JComponent) {
             reset();  // reset auto-lock setiap ada aktivitas mouse/keyboard
         }
     }
-}, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+};
+Toolkit.getDefaultToolkit().addAWTEventListener(awtEventListener,
+        AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
 ```
+
+**Penting:** AWTEventListener disimpan di field `awtEventListener` agar bisa di-remove dengan method `stop()`:
+
+```java
+// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 58-61
+public void stop() {
+    timer.stop();
+    Toolkit.getDefaultToolkit().removeAWTEventListener(awtEventListener);
+}
+```
+
+Tanpa `stop()`, listener akan terus hidup meskipun jendela ditutup - menyebabkan **zombie process**.
 
 ### Contoh 3: Callback Setup
 
@@ -638,13 +690,13 @@ setupFrame.setCallback(new SetupFrame.SetupCallback() {
 });
 ```
 
-Anonymous class digunakan secara ekstensif di semua view callback — ini adalah cara Java Swing menghubungkan event UI dengan logic aplikasi.
+Anonymous class digunakan secara ekstensif di semua view callback - ini adalah cara Java Swing menghubungkan event UI dengan logic aplikasi.
 
 ---
 
 ## 15. Enum
 
-**Materi:** Enum adalah tipe data yang memiliki sekumpulan konstanta tetap. Enum di Java lebih kuat dari bahasa lain — bisa punya field, constructor, dan method.
+**Materi:** Enum adalah tipe data yang memiliki sekumpulan konstanta tetap. Enum di Java lebih kuat dari bahasa lain - bisa punya field, constructor, dan method.
 
 ### Contoh: Enum `Strength` di `PasswordStrengthBar`
 
@@ -677,7 +729,7 @@ String label = s.getLabel();  // "Strong"
 Color c = s.getColor();       // RGB(40,167,69)
 ```
 
-**Mengapa enum?** — lebih aman daripada `String` atau `int` karena nilai dibatasi. Tidak mungkin salah tulis "Stroong" atau pakai `int` 99.
+**Mengapa enum?** - lebih aman daripada `String` atau `int` karena nilai dibatasi. Tidak mungkin salah tulis "Stroong" atau pakai `int` 99.
 
 ---
 
@@ -771,19 +823,19 @@ Resource `Connection`, `PreparedStatement`, dan `ResultSet` semuanya `AutoClosea
 ┌──────────────────────────────────────────────┐
 │ VIEW (tampilan, input user)                  │
 │ MainFrame, LoginFrame, SetupFrame, ...       │
-│ Dialog, JTable, JMenuBar                    │
+│ Dialog, JTable, JMenuBar                     │
 ├──────────────────────────────────────────────┤
-│ CONTROLLER (menghubungkan View ↔ Service)   │
-│ AuthController, VaultController             │
+│ CONTROLLER (menghubungkan View ↔ Service)    │
+│ AuthController, VaultController              │
 ├──────────────────────────────────────────────┤
-│ SERVICE (logika bisnis, enkripsi)           │
+│ SERVICE (logika bisnis, enkripsi)            │
 │ AuthService, VaultService, EncryptionService │
 ├──────────────────────────────────────────────┤
-│ DAO (akses database, query SQL)            │
-│ DatabaseManager, CredentialDAO, ...         │
+│ DAO (akses database, query SQL)              │
+│ DatabaseManager, CredentialDAO, ...          │
 ├──────────────────────────────────────────────┤
-│ MODEL / DATABASE (POJO + MySQL)            │
-│ Credential, Category, MasterConfig          │
+│ MODEL / DATABASE (POJO + MySQL)              │
+│ Credential, Category, MasterConfig           │
 └──────────────────────────────────────────────┘
 ```
 
@@ -827,7 +879,7 @@ Resource `Connection`, `PreparedStatement`, dan `ResultSet` semuanya `AutoClosea
 ### 1. Singleton (melalui static utility)
 
 ```java
-// DatabaseManager — koneksi tunggal
+// DatabaseManager - koneksi tunggal
 private static Connection connection;
 
 public static Connection getConnection() {
@@ -837,7 +889,7 @@ public static Connection getConnection() {
     return connection;
 }
 
-// EncryptionService — private constructor, static methods
+// EncryptionService - private constructor, static methods
 private EncryptionService() {}
 public static String encryptWithAES(...) { ... }
 ```
@@ -893,26 +945,26 @@ private PasswordGeneratorDialog.Generator createPasswordGenerator() {
 | `model/Category.java` | Override `toString()`, constructor |
 | `model/MasterConfig.java` | POJO, constructor, encapsulation |
 | `dao/DatabaseManager.java` | Static field/method, try-with-resources, singleton pattern |
-| `dao/CredentialDAO.java` | JDBC, try-with-resources, List, Generics |
+| `dao/CredentialDAO.java` | JDBC, try-with-resources, List, Generics, `findById()` |
 | `dao/CategoryDAO.java` | JDBC query, List return type |
 | `dao/MasterConfigDAO.java` | JDBC insert/update/select |
 | `service/EncryptionService.java` | Static utility, final class, byte array manipulation |
 | `service/KeyDerivationService.java` | Static utility, final constants, exception handling |
 | `service/AuthService.java` | Envelope encryption, finally block cleanup, instance fields |
-| `service/VaultService.java` | Delegation, encrypt/decrypt flow |
+| `service/VaultService.java` | Delegation, encrypt/decrypt flow, per-item exception handling (`[decryption error]`), `findById()` to restore ciphertext on unchanged password |
 | `service/RecoveryKeyService.java` | Static utility, SecureRandom |
 | `service/PasswordGeneratorService.java` | Static utility, Fisher-Yates shuffle |
-| `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally |
-| `controller/VaultController.java` | Factory method, anonymous Generator, callback wiring |
-| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components |
+| `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally, `clearAllFields()` on recovery failure |
+| `controller/VaultController.java` | Factory method, anonymous Generator, callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock |
+| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components, `cleanup()` method to stop timers and remove listeners |
 | `view/LoginFrame.java` | Inheritance, inner interface, Timer, event handling |
 | `view/SetupFrame.java` | Inheritance, inner interface, password strength validation |
-| `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling |
+| `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling, `clearAllFields()` public untuk reset form dari luar |
 | `view/AddEditCredentialDialog.java` | Inheritance (extends JDialog), constructor overloading |
 | `view/PasswordGeneratorDialog.java` | Inheritance, inner interface (Generator), callback pattern |
 | `view/component/CredentialTableModel.java` | Inheritance (extends AbstractTableModel), List, Generics, Override |
 | `view/component/PasswordStrengthBar.java` | Inheritance (extends JComponent), enum, Override paintComponent |
-| `view/component/AutoLockManager.java` | Anonymous class (ActionListener, AWTEventListener), Runnable |
+| `view/component/AutoLockManager.java` | Anonymous class (ActionListener, AWTEventListener), Runnable, `stop()` method to remove global listener and prevent zombie processes |
 | `view/component/ClipboardTimer.java` | Anonymous class, Consumer interface, Timer |
 | `view/component/MainMenuBar.java` | Inheritance (extends JMenuBar), menu bar construction |
 | `util/AppIcon.java` | Static utility, Java2D graphics, private constructor |

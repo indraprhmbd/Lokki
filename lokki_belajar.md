@@ -974,6 +974,106 @@ PasswordGenerator (abstract)
 
 ---
 
+## 20. Multithreading
+
+**Materi:** Multithreading memungkinkan program menjalankan beberapa tugas secara bersamaan. Di Java, thread dibuat dengan class `Thread` dan tugasnya ditulis di interface `Runnable`. Keyword `synchronized` melindungi data agar tidak diakses oleh dua thread sekaligus.
+
+### 20.1 `synchronized` keyword
+
+`public synchronized ReturnType methodName(...)` — hanya satu thread yang boleh menjalankan method ini dalam satu waktu. Jika thread B mencoba memanggil method yang sama saat thread A sedang menjalankannya, thread B akan **menunggu** sampai thread A selesai.
+
+```java
+// File: src/main/java/com/lokki/service/VaultService.java
+public synchronized List<Credential> getAllCredentials(byte[] vaultKey) {
+    // DB query + decrypt — hanya satu thread dalam satu waktu
+}
+
+public synchronized void addCredential(byte[] vaultKey, Credential credential, String plaintextPassword) {
+    // insert — tidak bisa berbarengan dengan getAllCredentials
+}
+```
+
+**Mengapa penting?** Tanpa `synchronized`, jika thread A sedang membaca credential sementara thread B menulis credential baru, data yang dibaca bisa tidak konsisten (misal setengah data lama, setengah data baru).
+
+### 20.2 Thread + Runnable
+
+**`Runnable`** adalah interface dengan satu method: `void run()`. Isinya adalah kode yang akan dijalankan di thread terpisah.
+
+**`Thread`** adalah object yang menjalankan `Runnable` di thread baru. Panggil `start()` (bukan `run()`) untuk memulai thread.
+
+```java
+// File: src/main/java/com/lokki/controller/VaultController.java, baris 182-204
+private void refreshCredentials() {
+    mainFrame.setStatusText("Loading credentials...");          // (A) langsung di EDT
+
+    Thread worker = new Thread(new Runnable() {                 // (B) bikin thread baru
+        @Override
+        public void run() {
+            // ↓↓↓ kode ini berjalan di THREAD TERPISAH ↓↓↓
+            try {
+                final List<Credential> credentials =
+                        vaultService.getAllCredentials(vaultKey);   // query + decrypt
+
+                SwingUtilities.invokeLater(new Runnable() {        // (C) balik ke EDT
+                    @Override
+                    public void run() {
+                        mainFrame.refreshTable(credentials);       // update UI
+                    }
+                });
+            } catch (final Exception e) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainFrame.showError("Failed to load: " + e.getMessage());
+                    }
+                });
+            }
+        }
+    });
+    worker.start();  // (D) jalankan thread — JANGAN worker.run()!
+}
+```
+
+**Alur eksekusi:**
+```
+EDT (UI Thread)                        Background Thread
+─────────────────                      ─────────────────
+(A) setStatusText("Loading...")
+(B) new Thread(...)
+(D) worker.start() ───────────────►    masuk ke run()
+                                       vaultService.getAllCredentials()
+                                       (DB query + decrypt — berat!)
+(C) invokeLater(runnable) ◄────────    selesai semua
+    refreshTable(credentials)
+    (update tabel di EDT)
+```
+
+### 20.3 Kenapa tidak langsung `worker.run()`?
+
+`worker.run()` menjalankan isi `run()` di **thread yang sama** (EDT), bukan di thread baru. Sama saja dengan memanggil method biasa — UI tetap freeze.
+
+```java
+worker.run();   // ❌ SALAH — blocking EDT, sama seperti tanpa thread
+worker.start(); // ✅ BENAR — jalankan di thread baru, EDT tetap responsif
+```
+
+### 20.4 `SwingUtilities.invokeLater()`
+
+Swing melarang komponen UI diakses dari thread selain EDT. Setelah background thread selesai, kita harus "kembali" ke EDT untuk update tabel:
+
+```java
+SwingUtilities.invokeLater(new Runnable() {
+    @Override
+    public void run() {
+        mainFrame.refreshTable(credentials);  // aman — dijalankan di EDT
+    }
+});
+```
+
+Method `invokeLater()` menaruh `Runnable` ke dalam antrian EDT. EDT akan menjalankannya setelah menyelesaikan tugas-tugas UI lainnya.
+
+---
+
 ## Ringkasan Konsep per File
 
 | File (package) | Konsep OOP yang bisa dipelajari |
@@ -988,14 +1088,14 @@ PasswordGenerator (abstract)
 | `service/EncryptionService.java` | Static utility, final class, byte array manipulation |
 | `service/KeyDerivationService.java` | Static utility, final constants, exception handling |
 | `service/AuthService.java` | Envelope encryption, finally block cleanup, instance fields |
-| `service/VaultService.java` | Delegation, encrypt/decrypt flow, per-item exception handling (`[decryption error]`), `findById()` to restore ciphertext on unchanged password |
+| `service/VaultService.java` | Delegation, encrypt/decrypt flow, per-item exception handling (`[decryption error]`), `findById()` to restore ciphertext on unchanged password, `synchronized` keyword on 7 methods for thread safety |
 | `service/RecoveryKeyService.java` | Static utility, SecureRandom |
 | `service/PasswordGenerator.java` | Abstract class, strategy pattern parent |
 | `service/RandomPasswordGenerator.java` | Inheritance (extends PasswordGenerator), Fisher-Yates shuffle |
 | `service/PassphraseGenerator.java` | Inheritance (extends PasswordGenerator), word list, passphrase generation |
 | `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally, `clearAllFields()` on recovery failure |
-| `controller/VaultController.java` | Callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock |
-| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components, `cleanup()` method to stop timers and remove listeners |
+| `controller/VaultController.java` | Callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock, `Thread` + `Runnable` for background credential loading, `SwingUtilities.invokeLater()` to update UI back on EDT |
+| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components, `cleanup()` method to stop timers and remove listeners, `setStatusText()` for background loading feedback |
 | `view/LoginFrame.java` | Inheritance, inner interface, Timer, event handling |
 | `view/SetupFrame.java` | Inheritance, inner interface, password strength validation |
 | `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling, `clearAllFields()` public untuk reset form dari luar |

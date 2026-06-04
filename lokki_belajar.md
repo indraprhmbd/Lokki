@@ -529,6 +529,44 @@ try {
 
 `finally` **selalu** dijalankan — baik ada exception maupun tidak. Cocok untuk cleanup (hapus key dari memory, tutup koneksi, dll).
 
+### Contoh 5: Try-Finally untuk jaminan System.exit
+
+```java
+// File: src/main/java/com/lokki/controller/VaultController.java, baris 116-126
+@Override
+public void onExit() {
+    try {
+        if (authController != null) {
+            authController.clearSession();
+        }
+    } finally {
+        mainFrame.cleanup();   // matikan timer + hapus event listener
+        mainFrame.dispose();
+        System.exit(0);        // tetap dijalankan meskipun clearSession() throw
+    }
+}
+```
+
+### Contoh 6: Per-item exception handling — satu credential corrupt tidak merusak yang lain
+
+```java
+// File: src/main/java/com/lokki/service/VaultService.java, baris 118-127
+private void decryptPasswords(byte[] vaultKey, List<Credential> credentials) {
+    for (Credential credential : credentials) {
+        try {
+            String decrypted = EncryptionService.decryptWithAES(
+                    vaultKey, credential.getEncryptedPassword());
+            credential.setEncryptedPassword(decrypted);
+        } catch (Exception e) {
+            credential.setEncryptedPassword("[decryption error]");
+            // teruskan ke credential berikutnya, jangan crash
+        }
+    }
+}
+```
+
+**Pola penting:** Exception di dalam loop ditangkap per-item, bukan per-list. Satu data corrupt tidak menghalangi data lain untuk ditampilkan.
+
 ---
 
 ## 12. Collections Framework
@@ -615,16 +653,30 @@ this.timer = new Timer(TICK_INTERVAL_MS, new ActionListener() {
 ### Contoh 2: Implementasi `AWTEventListener` secara anonymous
 
 ```java
-// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 43-50
-Toolkit.getDefaultToolkit().addAWTEventListener(new java.awt.event.AWTEventListener() {
+// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 44-53
+this.awtEventListener = new java.awt.event.AWTEventListener() {
     @Override
-    public void eventDispatched(java.awt.AWTEvent event) {
+    public void eventDispatched(java.awt.event.AWTEvent event) {
         if (event.getSource() instanceof javax.swing.JComponent) {
             reset();  // reset auto-lock setiap ada aktivitas mouse/keyboard
         }
     }
-}, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+};
+Toolkit.getDefaultToolkit().addAWTEventListener(awtEventListener,
+        AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
 ```
+
+**Penting:** AWTEventListener disimpan di field `awtEventListener` agar bisa di-remove dengan method `stop()`:
+
+```java
+// File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 58-61
+public void stop() {
+    timer.stop();
+    Toolkit.getDefaultToolkit().removeAWTEventListener(awtEventListener);
+}
+```
+
+Tanpa `stop()`, listener akan terus hidup meskipun jendela ditutup — menyebabkan **zombie process**.
 
 ### Contoh 3: Callback Setup
 
@@ -893,26 +945,26 @@ private PasswordGeneratorDialog.Generator createPasswordGenerator() {
 | `model/Category.java` | Override `toString()`, constructor |
 | `model/MasterConfig.java` | POJO, constructor, encapsulation |
 | `dao/DatabaseManager.java` | Static field/method, try-with-resources, singleton pattern |
-| `dao/CredentialDAO.java` | JDBC, try-with-resources, List, Generics |
+| `dao/CredentialDAO.java` | JDBC, try-with-resources, List, Generics, `findById()` |
 | `dao/CategoryDAO.java` | JDBC query, List return type |
 | `dao/MasterConfigDAO.java` | JDBC insert/update/select |
 | `service/EncryptionService.java` | Static utility, final class, byte array manipulation |
 | `service/KeyDerivationService.java` | Static utility, final constants, exception handling |
 | `service/AuthService.java` | Envelope encryption, finally block cleanup, instance fields |
-| `service/VaultService.java` | Delegation, encrypt/decrypt flow |
+| `service/VaultService.java` | Delegation, encrypt/decrypt flow, per-item exception handling (`[decryption error]`), `findById()` to restore ciphertext on unchanged password |
 | `service/RecoveryKeyService.java` | Static utility, SecureRandom |
 | `service/PasswordGeneratorService.java` | Static utility, Fisher-Yates shuffle |
-| `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally |
-| `controller/VaultController.java` | Factory method, anonymous Generator, callback wiring |
-| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components |
+| `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally, `clearAllFields()` on recovery failure |
+| `controller/VaultController.java` | Factory method, anonymous Generator, callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock |
+| `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components, `cleanup()` method to stop timers and remove listeners |
 | `view/LoginFrame.java` | Inheritance, inner interface, Timer, event handling |
 | `view/SetupFrame.java` | Inheritance, inner interface, password strength validation |
-| `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling |
+| `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling, `clearAllFields()` public untuk reset form dari luar |
 | `view/AddEditCredentialDialog.java` | Inheritance (extends JDialog), constructor overloading |
 | `view/PasswordGeneratorDialog.java` | Inheritance, inner interface (Generator), callback pattern |
 | `view/component/CredentialTableModel.java` | Inheritance (extends AbstractTableModel), List, Generics, Override |
 | `view/component/PasswordStrengthBar.java` | Inheritance (extends JComponent), enum, Override paintComponent |
-| `view/component/AutoLockManager.java` | Anonymous class (ActionListener, AWTEventListener), Runnable |
+| `view/component/AutoLockManager.java` | Anonymous class (ActionListener, AWTEventListener), Runnable, `stop()` method to remove global listener and prevent zombie processes |
 | `view/component/ClipboardTimer.java` | Anonymous class, Consumer interface, Timer |
 | `view/component/MainMenuBar.java` | Inheritance (extends JMenuBar), menu bar construction |
 | `util/AppIcon.java` | Static utility, Java2D graphics, private constructor |

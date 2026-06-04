@@ -143,7 +143,7 @@ private String siteName;
 Tidak bisa diakses langsung dari luar class:
 
 ```java
-// ❌ ERROR: field is private
+// ERROR: field is private
 credential.id = 5;
 credential.siteName = "GitHub";
 ```
@@ -151,7 +151,7 @@ credential.siteName = "GitHub";
 Harus melalui getter/setter publik:
 
 ```java
-// ✅ Benar
+// Benar
 credential.setId(5);
 credential.setSiteName("GitHub");
 String name = credential.getSiteName();
@@ -619,8 +619,8 @@ list.add(new Credential());  // tidak ada pemeriksaan tipe
 
 ```java
 List<Credential> list = new ArrayList<>();
-list.add(new Credential());  // ✅ hanya Credential
-list.add("string");           // ❌ compile error
+list.add(new Credential());  // Benar, hanya Credential
+list.add("string");           // Salah, compile error
 ```
 
 ### Generic di interface callback:

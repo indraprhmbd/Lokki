@@ -229,6 +229,35 @@ JDialog
   └── PasswordGeneratorDialog
 ```
 
+### Contoh 4 (Custom Inheritance): `PasswordGenerator` → `RandomPasswordGenerator` dan `PassphraseGenerator`
+
+Ini adalah inheritance yang **kita buat sendiri** (bukan dari library eksternal):
+
+```java
+// File: src/main/java/com/lokki/service/PasswordGenerator.java
+public abstract class PasswordGenerator {
+    protected static final SecureRandom RANDOM = new SecureRandom();
+    public abstract String generate();
+}
+
+// File: src/main/java/com/lokki/service/RandomPasswordGenerator.java
+public class RandomPasswordGenerator extends PasswordGenerator {
+    // generate password acak: "aB7$kP2#mQ9..."
+}
+
+// File: src/main/java/com/lokki/service/PassphraseGenerator.java
+public class PassphraseGenerator extends PasswordGenerator {
+    // generate passphrase kata: "Lucky-45-Rats-King"
+}
+```
+
+**Class hierarchy:**
+```
+PasswordGenerator (abstract)
+  ├── RandomPasswordGenerator  (password acak)
+  └── PassphraseGenerator      (passphrase kata)
+```
+
 ---
 
 ## 5. Polymorphism - Method Overriding
@@ -282,32 +311,7 @@ protected void paintComponent(Graphics g) {
 
 **Materi:** Interface adalah kontrak yang mendefinisikan method apa saja yang harus dimiliki oleh class yang mengimplementasikannya. Interface memungkinkan **polymorphism** - object dari class berbeda bisa diperlakukan sama melalui interface yang sama.
 
-### Contoh 1: Interface `Generator` di `PasswordGeneratorDialog`
-
-```java
-// File: src/main/java/com/lokki/view/PasswordGeneratorDialog.java
-public interface Generator {
-    String generate(int length, boolean includeUppercase, boolean includeLowercase,
-                    boolean includeDigits, boolean includeSymbols);
-}
-```
-
-**Implementasi anonymous di VaultController:**
-
-```java
-// VaultController membuat anonymous class yang mengimplementasikan Generator
-private PasswordGeneratorDialog.Generator createPasswordGenerator() {
-    return new PasswordGeneratorDialog.Generator() {
-        @Override
-        public String generate(int length, boolean upper, boolean lower,
-                               boolean digits, boolean symbols) {
-            return PasswordGeneratorService.generate(length, upper, lower, digits, symbols);
-        }
-    };
-}
-```
-
-### Contoh 2: Interface `Runnable`
+### Contoh 1: Interface `Runnable`
 
 ```java
 // File: src/main/java/com/lokki/view/component/AutoLockManager.java
@@ -316,7 +320,7 @@ private final Runnable onLock;
 // Diisi oleh MainFrame dengan anonymous class (callback)
 ```
 
-### Contoh 3: Interface `ActionListener` dari Swing
+### Contoh 2: Interface `ActionListener` dari Swing
 
 ```java
 // File: src/main/java/com/lokki/view/component/AutoLockManager.java, baris 25-41
@@ -334,14 +338,14 @@ this.timer = new Timer(TICK_INTERVAL_MS, new ActionListener() {
 
 **Materi:** Abstract class adalah class yang tidak bisa di-instantiate langsung. Biasanya memiliki method abstract yang harus di-override oleh subclass.
 
-### Contoh: `AbstractTableModel`
+### Contoh 1 (External): `AbstractTableModel`
 
 ```java
 // File: src/main/java/com/lokki/view/component/CredentialTableModel.java, baris 8
 public class CredentialTableModel extends AbstractTableModel {
 ```
 
-`AbstractTableModel` adalah abstract class. Method abstract yang wajib di-override:
+`AbstractTableModel` adalah abstract class dari Swing. Method abstract yang wajib di-override:
 
 ```java
 public abstract int getRowCount();     // wajib di-override
@@ -354,6 +358,40 @@ Method konkret (sudah ada implementasi) yang bisa dipakai langsung:
 ```java
 fireTableDataChanged();  // memberitahu JTable untuk refresh
 ```
+
+### Contoh 2 (Custom): `PasswordGenerator`
+
+Ini adalah abstract class yang **kita buat sendiri**, bukan dari library:
+
+```java
+// File: src/main/java/com/lokki/service/PasswordGenerator.java
+public abstract class PasswordGenerator {
+
+    protected static final SecureRandom RANDOM = new SecureRandom();
+
+    public abstract String generate();
+}
+```
+
+**Dua subclass dengan implementasi berbeda:**
+
+```java
+// RandomPasswordGenerator.java — extends PasswordGenerator
+@Override
+public String generate() {
+    // algoritma: pilih char acak dari charset yang dipilih
+    // hasil: "aB7$kP2#mQ9..."
+}
+
+// PassphraseGenerator.java — extends PasswordGenerator
+@Override
+public String generate() {
+    // algoritma: pilih kata dari word list, gabung dengan separator
+    // hasil: "Lucky-45-Rats-King"
+}
+```
+
+**Mengapa pakai abstract class?** Karena kedua subclass punya tujuan yang sama (`generate()` password) tapi cara kerja berbeda. Abstract class memastikan keduanya punya method `generate()` yang konsisten.
 
 ---
 
@@ -769,7 +807,6 @@ public class MainFrame extends JFrame {
 | `SetupFrame.SetupCallback` | `view/SetupFrame.java` | Setup selesai |
 | `RecoveryFrame.RecoveryCallback` | `view/RecoveryFrame.java` | Recovery atau batal |
 | `AddEditCredentialDialog.CredentialCallback` | `view/AddEditCredentialDialog.java` | Simpan atau batal edit |
-| `PasswordGeneratorDialog.Generator` | `view/PasswordGeneratorDialog.java` | Generate password |
 | `PasswordGeneratorDialog.PasswordSelectionCallback` | `view/PasswordGeneratorDialog.java` | Password dipilih |
 | `AuthController.AuthCallback` | `controller/AuthController.java` | Autentikasi berhasil/sesi dibersihkan |
 
@@ -896,7 +933,7 @@ public static String encryptWithAES(...) { ... }
 
 ### 2. Utility Class (stateless)
 
-Class seperti `EncryptionService`, `KeyDerivationService`, `PasswordGeneratorService`, `SecureMemoryUtil`, `AppIcon`, dan `RecoveryKeyFormatter` semuanya mengikuti pola yang sama:
+Class seperti `EncryptionService`, `KeyDerivationService`, `SecureMemoryUtil`, `AppIcon`, dan `RecoveryKeyFormatter` semuanya mengikuti pola yang sama:
 - `private` constructor
 - Semua method `public static`
 - Tidak punya state (tidak ada field instance)
@@ -918,21 +955,21 @@ View                    Controller
 
 ### 4. Strategy Pattern
 
-`PasswordGeneratorDialog.Generator` adalah interface yang memisahkan "cara generate password" dari dialog-nya. `VaultController` menyediakan implementasi yang mendelegasikan ke `PasswordGeneratorService`. Jika suatu saat ingin mengganti algoritma generate, cukup buat implementasi baru tanpa mengubah dialog.
+`PasswordGenerator` adalah abstract class yang menjadi kontrak untuk berbagai algoritma generate password. Masing-masing algoritma diimplementasikan di subclass terpisah:
 
-### 5. Factory Method
+- `RandomPasswordGenerator` — generate password acak dari charset
+- `PassphraseGenerator` — generate passphrase dari word list
 
-`VaultController.createPasswordGenerator()` adalah factory method yang membuat object `Generator`:
+`PasswordGeneratorDialog` tidak peduli algoritma mana yang dipakai — ia tinggal panggil `generator.generate()`. Untuk mengganti algoritma, tinggal buat subclass baru tanpa mengubah dialog.
 
-```java
-private PasswordGeneratorDialog.Generator createPasswordGenerator() {
-    return new PasswordGeneratorDialog.Generator() {
-        @Override
-        public String generate(...) {
-            return PasswordGeneratorService.generate(length, upper, lower, digits, symbols);
-        }
-    };
-}
+```
+PasswordGeneratorDialog
+       │
+       │ panggil generate()
+       ▼
+PasswordGenerator (abstract)
+  ├── RandomPasswordGenerator    "aB7$kP2#mQ9..."
+  └── PassphraseGenerator        "Lucky-45-Rats-King"
 ```
 
 ---
@@ -953,15 +990,17 @@ private PasswordGeneratorDialog.Generator createPasswordGenerator() {
 | `service/AuthService.java` | Envelope encryption, finally block cleanup, instance fields |
 | `service/VaultService.java` | Delegation, encrypt/decrypt flow, per-item exception handling (`[decryption error]`), `findById()` to restore ciphertext on unchanged password |
 | `service/RecoveryKeyService.java` | Static utility, SecureRandom |
-| `service/PasswordGeneratorService.java` | Static utility, Fisher-Yates shuffle |
+| `service/PasswordGenerator.java` | Abstract class, strategy pattern parent |
+| `service/RandomPasswordGenerator.java` | Inheritance (extends PasswordGenerator), Fisher-Yates shuffle |
+| `service/PassphraseGenerator.java` | Inheritance (extends PasswordGenerator), word list, passphrase generation |
 | `controller/AuthController.java` | Anonymous class callback, inner interface, try-finally, `clearAllFields()` on recovery failure |
-| `controller/VaultController.java` | Factory method, anonymous Generator, callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock |
+| `controller/VaultController.java` | Callback wiring, try-finally cleanup on exit, `cleanup()` before `dispose()` on lock |
 | `view/MainFrame.java` | Inheritance (extends JFrame), inner interface, Swing components, `cleanup()` method to stop timers and remove listeners |
 | `view/LoginFrame.java` | Inheritance, inner interface, Timer, event handling |
 | `view/SetupFrame.java` | Inheritance, inner interface, password strength validation |
 | `view/RecoveryFrame.java` | Inheritance, inner interface, paste handling, `clearAllFields()` public untuk reset form dari luar |
 | `view/AddEditCredentialDialog.java` | Inheritance (extends JDialog), constructor overloading |
-| `view/PasswordGeneratorDialog.java` | Inheritance, inner interface (Generator), callback pattern |
+| `view/PasswordGeneratorDialog.java` | Inheritance (extends JDialog), CardLayout, callback pattern, strategy pattern usage |
 | `view/component/CredentialTableModel.java` | Inheritance (extends AbstractTableModel), List, Generics, Override |
 | `view/component/PasswordStrengthBar.java` | Inheritance (extends JComponent), enum, Override paintComponent |
 | `view/component/AutoLockManager.java` | Anonymous class (ActionListener, AWTEventListener), Runnable, `stop()` method to remove global listener and prevent zombie processes |

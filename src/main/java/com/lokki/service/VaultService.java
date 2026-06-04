@@ -20,7 +20,7 @@ public class VaultService {
     /**
      * Returns all credentials with decrypted passwords.
      */
-    public List<Credential> getAllCredentials(byte[] vaultKey) {
+    public synchronized List<Credential> getAllCredentials(byte[] vaultKey) {
         try {
             List<Credential> credentials = credentialDAO.findAll();
             decryptPasswords(vaultKey, credentials);
@@ -33,7 +33,7 @@ public class VaultService {
     /**
      * Returns credentials filtered by category with decrypted passwords.
      */
-    public List<Credential> getCredentialsByCategory(byte[] vaultKey, int categoryId) {
+    public synchronized List<Credential> getCredentialsByCategory(byte[] vaultKey, int categoryId) {
         try {
             List<Credential> credentials = credentialDAO.findByCategory(categoryId);
             decryptPasswords(vaultKey, credentials);
@@ -46,7 +46,7 @@ public class VaultService {
     /**
      * Searches credentials by site name and returns them with decrypted passwords.
      */
-    public List<Credential> searchCredentials(byte[] vaultKey, String searchTerm) {
+    public synchronized List<Credential> searchCredentials(byte[] vaultKey, String searchTerm) {
         try {
             List<Credential> credentials = credentialDAO.search(searchTerm);
             decryptPasswords(vaultKey, credentials);
@@ -59,7 +59,7 @@ public class VaultService {
     /**
      * Encrypts the plaintext password with the vault key and saves the credential.
      */
-    public void addCredential(byte[] vaultKey, Credential credential, String plaintextPassword) {
+    public synchronized void addCredential(byte[] vaultKey, Credential credential, String plaintextPassword) {
         try {
             String encrypted = EncryptionService.encryptWithAES(vaultKey, plaintextPassword);
             credential.setEncryptedPassword(encrypted);
@@ -72,7 +72,7 @@ public class VaultService {
     /**
      * Updates an existing credential, re-encrypting the password if provided.
      */
-    public void updateCredential(byte[] vaultKey, Credential credential, String plaintextPassword) {
+    public synchronized void updateCredential(byte[] vaultKey, Credential credential, String plaintextPassword) {
         try {
             if (plaintextPassword != null && !plaintextPassword.isEmpty()) {
                 String encrypted = EncryptionService.encryptWithAES(vaultKey, plaintextPassword);
@@ -93,7 +93,7 @@ public class VaultService {
     /**
      * Deletes a credential by its id.
      */
-    public void deleteCredential(int id) {
+    public synchronized void deleteCredential(int id) {
         try {
             credentialDAO.delete(id);
         } catch (SQLException e) {
@@ -104,7 +104,7 @@ public class VaultService {
     /**
      * Returns all categories from the database.
      */
-    public List<Category> getAllCategories() {
+    public synchronized List<Category> getAllCategories() {
         try {
             return categoryDAO.findAll();
         } catch (SQLException e) {

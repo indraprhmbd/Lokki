@@ -294,6 +294,10 @@ public class MainFrame extends JFrame {
         );
     }
 
+    public void setStatusText(String text) {
+        statusLabel.setText(text);
+    }
+
     public void refreshTable(List<Credential> credentials) {
         this.currentCredentials = credentials;
         tableModel.setCredentials(credentials);

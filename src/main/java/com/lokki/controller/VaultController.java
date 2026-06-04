@@ -131,8 +131,8 @@ public class VaultController {
         });
 
         loadCategories();
-        refreshCredentials();
         mainFrame.setVisible(true);
+        refreshCredentials();
     }
 
     private void showAddCredentialDialog() {
@@ -180,12 +180,31 @@ public class VaultController {
     }
 
     private void refreshCredentials() {
-        try {
-            List<Credential> credentials = vaultService.getAllCredentials(vaultKey);
-            mainFrame.refreshTable(credentials);
-        } catch (Exception e) {
-            mainFrame.showError("Failed to load credentials: " + e.getMessage());
-        }
+        mainFrame.setStatusText("Loading credentials...");
+
+        Thread worker = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<Credential> credentials = vaultService.getAllCredentials(vaultKey);
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainFrame.refreshTable(credentials);
+                        }
+                    });
+                } catch (final Exception e) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainFrame.showError("Failed to load credentials: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+        worker.start();
     }
 
     private void loadCategories() {

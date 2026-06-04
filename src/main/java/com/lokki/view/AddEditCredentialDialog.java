@@ -34,7 +34,6 @@ public class AddEditCredentialDialog extends JDialog {
     private JButton saveButton;
     private JButton cancelButton;
     private JButton generateButton;
-    private PasswordGeneratorDialog.Generator passwordGenerator;
     private CredentialCallback callback;
     private Credential editingCredential;
 
@@ -43,14 +42,13 @@ public class AddEditCredentialDialog extends JDialog {
         void onCancel();
     }
 
-    public AddEditCredentialDialog(JFrame parent, List<Category> categories, PasswordGeneratorDialog.Generator passwordGenerator) {
-        this(parent, categories, null, passwordGenerator);
+    public AddEditCredentialDialog(JFrame parent, List<Category> categories) {
+        this(parent, categories, null);
     }
 
-    public AddEditCredentialDialog(JFrame parent, List<Category> categories, Credential credential, PasswordGeneratorDialog.Generator passwordGenerator) {
+    public AddEditCredentialDialog(JFrame parent, List<Category> categories, Credential credential) {
         super(parent, credential == null ? "Add Credential" : "Edit Credential", true);
         this.editingCredential = credential;
-        this.passwordGenerator = passwordGenerator;
         initComponents(categories);
         pack();
         setLocationRelativeTo(parent);
@@ -161,7 +159,7 @@ public class AddEditCredentialDialog extends JDialog {
         generateButton.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
-                PasswordGeneratorDialog dialog = new PasswordGeneratorDialog((JFrame) getParent(), passwordGenerator);
+                PasswordGeneratorDialog dialog = new PasswordGeneratorDialog((JFrame) getParent());
                 dialog.setCallback(new PasswordGeneratorDialog.PasswordSelectionCallback() {
                     @Override
                     public void onPasswordSelected(String password) {

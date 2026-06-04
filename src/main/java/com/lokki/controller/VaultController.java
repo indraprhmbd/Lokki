@@ -2,7 +2,6 @@ package com.lokki.controller;
 
 import com.lokki.model.Category;
 import com.lokki.model.Credential;
-import com.lokki.service.PasswordGeneratorService;
 import com.lokki.service.VaultService;
 import com.lokki.view.AddEditCredentialDialog;
 import com.lokki.view.MainFrame;
@@ -108,7 +107,7 @@ public class VaultController {
 
             @Override
             public void onShowPasswordGenerator() {
-                PasswordGeneratorDialog dialog = new PasswordGeneratorDialog(mainFrame, createPasswordGenerator());
+                PasswordGeneratorDialog dialog = new PasswordGeneratorDialog(mainFrame);
                 dialog.setVisible(true);
             }
 
@@ -138,7 +137,7 @@ public class VaultController {
 
     private void showAddCredentialDialog() {
         List<Category> categories = vaultService.getAllCategories();
-        AddEditCredentialDialog dialog = new AddEditCredentialDialog(mainFrame, categories, createPasswordGenerator());
+        AddEditCredentialDialog dialog = new AddEditCredentialDialog(mainFrame, categories);
         dialog.setCallback(new AddEditCredentialDialog.CredentialCallback() {
             @Override
             public void onSave(Credential credential, String plaintextPassword) {
@@ -160,7 +159,7 @@ public class VaultController {
 
     private void showEditCredentialDialog(Credential credential) {
         List<Category> categories = vaultService.getAllCategories();
-        AddEditCredentialDialog dialog = new AddEditCredentialDialog(mainFrame, categories, credential, createPasswordGenerator());
+        AddEditCredentialDialog dialog = new AddEditCredentialDialog(mainFrame, categories, credential);
         dialog.setCallback(new AddEditCredentialDialog.CredentialCallback() {
             @Override
             public void onSave(Credential updatedCredential, String plaintextPassword) {
@@ -198,14 +197,4 @@ public class VaultController {
         }
     }
 
-    private PasswordGeneratorDialog.Generator createPasswordGenerator() {
-        return new PasswordGeneratorDialog.Generator() {
-            @Override
-            public String generate(int length, boolean includeUppercase, boolean includeLowercase,
-                                   boolean includeDigits, boolean includeSymbols) {
-                return PasswordGeneratorService.generate(length, includeUppercase, includeLowercase,
-                                                         includeDigits, includeSymbols);
-            }
-        };
-    }
 }

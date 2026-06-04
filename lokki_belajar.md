@@ -1,4 +1,4 @@
-# Lokki — Belajar OOP dari Codebase
+# Lokki - Belajar OOP dari Codebase
 
 Dokumen ini memetakan konsep Pemrograman Berorientasi Objek (PBO) yang diajarkan di kelas ke dalam kode nyata pada proyek Lokki. Setiap konsep dilengkapi referensi file dan baris agar kamu bisa langsung membuka dan mempelajarinya.
 
@@ -10,8 +10,8 @@ Dokumen ini memetakan konsep Pemrograman Berorientasi Objek (PBO) yang diajarkan
 2. [Constructor](#2-constructor)
 3. [Encapsulation (Getter & Setter)](#3-encapsulation-getter--setter)
 4. [Inheritance (extends)](#4-inheritance-extends)
-5. [Polymorphism — Method Overriding](#5-polymorphism--method-overriding)
-6. [Polymorphism — Interface](#6-polymorphism--interface)
+5. [Polymorphism - Method Overriding](#5-polymorphism--method-overriding)
+6. [Polymorphism - Interface](#6-polymorphism--interface)
 7. [Abstract Class](#7-abstract-class)
 8. [Static vs Instance](#8-static-vs-instance)
 9. [`final` Keyword](#9-final-keyword)
@@ -62,7 +62,7 @@ Credential credential = new Credential("GitHub", "https://github.com",
 ```
 
 **Penjelasan:**
-- `Credential` adalah **class** — blueprint untuk data login
+- `Credential` adalah **class** - blueprint untuk data login
 - Saat dipanggil `new Credential()`, Java membuat **object** di heap memory
 - Satu class bisa membuat banyak object (misal 100 credential = 100 object Credential)
 
@@ -88,7 +88,7 @@ Credential credential = new Credential("GitHub", "https://github.com",
 // Constructor 1: tanpa parameter (default)
 public Credential() {}
 
-// Constructor 2: dengan parameter — inisialisasi langsung
+// Constructor 2: dengan parameter - inisialisasi langsung
 public Credential(String siteName, String siteUrl, String username,
                   String encryptedPassword, int categoryId, String notes) {
     this.siteName = siteName;
@@ -101,7 +101,7 @@ public Credential(String siteName, String siteUrl, String username,
 ```
 
 **Konsep penting:**
-- `this` merujuk ke object saat ini — membedakan field (`this.siteName`) dari parameter (`siteName`)
+- `this` merujuk ke object saat ini - membedakan field (`this.siteName`) dari parameter (`siteName`)
 - **Constructor overloading**: dua constructor dengan parameter berbeda
 - Jika tidak menulis constructor sama sekali, Java menyediakan **default constructor** (no-arg) secara implicit
 
@@ -158,9 +158,9 @@ String name = credential.getSiteName();
 ```
 
 **Mengapa enkapsulasi penting?**
-1. **Kontrol akses** — kita bisa validasi di setter (misal menolak `null`)
-2. **Read-only** — cukup buat getter saja tanpa setter
-3. **Internal representation hiding** — kita bisa mengubah implementasi internal tanpa mengubah kode pemanggil
+1. **Kontrol akses** - kita bisa validasi di setter (misal menolak `null`)
+2. **Read-only** - cukup buat getter saja tanpa setter
+3. **Internal representation hiding** - kita bisa mengubah implementasi internal tanpa mengubah kode pemanggil
 
 ---
 
@@ -231,7 +231,7 @@ JDialog
 
 ---
 
-## 5. Polymorphism — Method Overriding
+## 5. Polymorphism - Method Overriding
 
 **Materi:** Overriding adalah menulis ulang method dari superclass di subclass dengan implementasi yang berbeda. Ditandai dengan anotasi `@Override`.
 
@@ -278,9 +278,9 @@ protected void paintComponent(Graphics g) {
 
 ---
 
-## 6. Polymorphism — Interface
+## 6. Polymorphism - Interface
 
-**Materi:** Interface adalah kontrak yang mendefinisikan method apa saja yang harus dimiliki oleh class yang mengimplementasikannya. Interface memungkinkan **polymorphism** — object dari class berbeda bisa diperlakukan sama melalui interface yang sama.
+**Materi:** Interface adalah kontrak yang mendefinisikan method apa saja yang harus dimiliki oleh class yang mengimplementasikannya. Interface memungkinkan **polymorphism** - object dari class berbeda bisa diperlakukan sama melalui interface yang sama.
 
 ### Contoh 1: Interface `Generator` di `PasswordGeneratorDialog`
 
@@ -385,15 +385,15 @@ String encrypted = EncryptionService.encryptWithAES(vaultKey, "password123");
 String decrypted = EncryptionService.decryptWithAES(vaultKey, encrypted);
 ```
 
-### Contoh Instance — setiap object punya state sendiri
+### Contoh Instance - setiap object punya state sendiri
 
 ```java
 // File: src/main/java/com/lokki/controller/AuthController.java, baris 17-18
 private final AuthService authService;  // instance field
-private byte[] vaultKey;                // instance field — berbeda untuk setiap object
+private byte[] vaultKey;                // instance field - berbeda untuk setiap object
 
 // File: src/main/java/com/lokki/dao/DatabaseManager.java, baris 15
-private static Connection connection;   // static — satu koneksi untuk semua pemanggil
+private static Connection connection;   // static - satu koneksi untuk semua pemanggil
 ```
 
 ### Utility class dengan static methods:
@@ -408,7 +408,7 @@ private static Connection connection;   // static — satu koneksi untuk semua p
 | `RecoveryKeyFormatter` | `format`, `strip`, `getExpectedLength` |
 | `AppIcon` | `getIcon` |
 
-Semua class di atas punya **private constructor** — tidak bisa dibuat object-nya.
+Semua class di atas punya **private constructor** - tidak bisa dibuat object-nya.
 
 ---
 
@@ -421,7 +421,7 @@ Semua class di atas punya **private constructor** — tidak bisa dibuat object-n
 | Penggunaan | File | Baris | Arti |
 |-----------|------|-------|------|
 | `public final class EncryptionService` | `EncryptionService.java` | 9 | Class tidak bisa di-extends |
-| `private static final String ALGORITHM` | `EncryptionService.java` | 11 | Konstanta — tidak bisa diubah |
+| `private static final String ALGORITHM` | `EncryptionService.java` | 11 | Konstanta - tidak bisa diubah |
 | `private final AuthService authService` | `AuthController.java` | 17 | Field reference tidak bisa di-reassign |
 
 ---
@@ -498,7 +498,7 @@ public static String encryptWithAES(byte[] key, String plaintext) {
         return Base64.getEncoder().encodeToString(combined);
     } catch (Exception e) {
         throw new RuntimeException("Encryption failed", e);
-        //          ^^^ unchecked exception — tidak wajib di-declare di throws
+        //          ^^^ unchecked exception - tidak wajib di-declare di throws
     }
 }
 ```
@@ -527,7 +527,7 @@ try {
 }
 ```
 
-`finally` **selalu** dijalankan — baik ada exception maupun tidak. Cocok untuk cleanup (hapus key dari memory, tutup koneksi, dll).
+`finally` **selalu** dijalankan - baik ada exception maupun tidak. Cocok untuk cleanup (hapus key dari memory, tutup koneksi, dll).
 
 ### Contoh 5: Try-Finally untuk jaminan System.exit
 
@@ -547,7 +547,7 @@ public void onExit() {
 }
 ```
 
-### Contoh 6: Per-item exception handling — satu credential corrupt tidak merusak yang lain
+### Contoh 6: Per-item exception handling - satu credential corrupt tidak merusak yang lain
 
 ```java
 // File: src/main/java/com/lokki/service/VaultService.java, baris 118-127
@@ -603,7 +603,7 @@ public CredentialTableModel() {
 ```java
 // File: src/main/java/com/lokki/model/Credential.java
 private List<Credential> credentials;
-//       ^^^^^^^^^^^^^^^ generic — list hanya bisa berisi object Credential
+//       ^^^^^^^^^^^^^^^ generic - list hanya bisa berisi object Credential
 ```
 
 **Tanpa generic (sebelum Java 5):**
@@ -626,7 +626,7 @@ list.add("string");           // ❌ compile error
 ### Generic di interface callback:
 
 ```java
-// Consumer<Integer> — generic interface dengan tipe Integer
+// Consumer<Integer> - generic interface dengan tipe Integer
 // File: ClipboardTimer.java
 private final Consumer<Integer> onTick;
 ```
@@ -676,7 +676,7 @@ public void stop() {
 }
 ```
 
-Tanpa `stop()`, listener akan terus hidup meskipun jendela ditutup — menyebabkan **zombie process**.
+Tanpa `stop()`, listener akan terus hidup meskipun jendela ditutup - menyebabkan **zombie process**.
 
 ### Contoh 3: Callback Setup
 
@@ -690,13 +690,13 @@ setupFrame.setCallback(new SetupFrame.SetupCallback() {
 });
 ```
 
-Anonymous class digunakan secara ekstensif di semua view callback — ini adalah cara Java Swing menghubungkan event UI dengan logic aplikasi.
+Anonymous class digunakan secara ekstensif di semua view callback - ini adalah cara Java Swing menghubungkan event UI dengan logic aplikasi.
 
 ---
 
 ## 15. Enum
 
-**Materi:** Enum adalah tipe data yang memiliki sekumpulan konstanta tetap. Enum di Java lebih kuat dari bahasa lain — bisa punya field, constructor, dan method.
+**Materi:** Enum adalah tipe data yang memiliki sekumpulan konstanta tetap. Enum di Java lebih kuat dari bahasa lain - bisa punya field, constructor, dan method.
 
 ### Contoh: Enum `Strength` di `PasswordStrengthBar`
 
@@ -729,7 +729,7 @@ String label = s.getLabel();  // "Strong"
 Color c = s.getColor();       // RGB(40,167,69)
 ```
 
-**Mengapa enum?** — lebih aman daripada `String` atau `int` karena nilai dibatasi. Tidak mungkin salah tulis "Stroong" atau pakai `int` 99.
+**Mengapa enum?** - lebih aman daripada `String` atau `int` karena nilai dibatasi. Tidak mungkin salah tulis "Stroong" atau pakai `int` 99.
 
 ---
 
@@ -879,7 +879,7 @@ Resource `Connection`, `PreparedStatement`, dan `ResultSet` semuanya `AutoClosea
 ### 1. Singleton (melalui static utility)
 
 ```java
-// DatabaseManager — koneksi tunggal
+// DatabaseManager - koneksi tunggal
 private static Connection connection;
 
 public static Connection getConnection() {
@@ -889,7 +889,7 @@ public static Connection getConnection() {
     return connection;
 }
 
-// EncryptionService — private constructor, static methods
+// EncryptionService - private constructor, static methods
 private EncryptionService() {}
 public static String encryptWithAES(...) { ... }
 ```

@@ -823,19 +823,19 @@ Resource `Connection`, `PreparedStatement`, dan `ResultSet` semuanya `AutoClosea
 ┌──────────────────────────────────────────────┐
 │ VIEW (tampilan, input user)                  │
 │ MainFrame, LoginFrame, SetupFrame, ...       │
-│ Dialog, JTable, JMenuBar                    │
+│ Dialog, JTable, JMenuBar                     │
 ├──────────────────────────────────────────────┤
-│ CONTROLLER (menghubungkan View ↔ Service)   │
-│ AuthController, VaultController             │
+│ CONTROLLER (menghubungkan View ↔ Service)    │
+│ AuthController, VaultController              │
 ├──────────────────────────────────────────────┤
-│ SERVICE (logika bisnis, enkripsi)           │
+│ SERVICE (logika bisnis, enkripsi)            │
 │ AuthService, VaultService, EncryptionService │
 ├──────────────────────────────────────────────┤
-│ DAO (akses database, query SQL)            │
-│ DatabaseManager, CredentialDAO, ...         │
+│ DAO (akses database, query SQL)              │
+│ DatabaseManager, CredentialDAO, ...          │
 ├──────────────────────────────────────────────┤
-│ MODEL / DATABASE (POJO + MySQL)            │
-│ Credential, Category, MasterConfig          │
+│ MODEL / DATABASE (POJO + MySQL)              │
+│ Credential, Category, MasterConfig           │
 └──────────────────────────────────────────────┘
 ```
 
